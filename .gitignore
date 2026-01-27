@@ -1,0 +1,11 @@
+backend/venv/
+__pycache__/
+*.pyc
+*.pt
+*.pth
+temp/
+uploads/
+datasets/
+COMOFOD/
+casia-20-image-tampering-detection-dataset/
+CG1050/
