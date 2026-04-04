@@ -6,6 +6,11 @@ from torchvision import datasets, transforms, models
 from sklearn.metrics import classification_report, f1_score
 from tqdm import tqdm
 
+torch.cuda.set_device(0)
+DEVICE=torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+model.to(DEVICE)
+
 TRAIN_DIR = "datasets/train"
 VAL_DIR = "datasets/val"
 BATCH_SIZE = 32

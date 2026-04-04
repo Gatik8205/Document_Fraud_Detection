@@ -1,121 +1,169 @@
-import { useLocation } from "react-router-dom";
-import type{ FraudResult, DecisionType, ConfidenceType } from "../types/fraud";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { FraudResult } from "../types/fraud";
 
 export default function Result() {
   const location = useLocation();
+  const navigate = useNavigate();
+
   const data = location.state?.result as FraudResult;
 
-  if (!data) return <div className="p-10 text-white">No data found</div>;
-
-  const riskColorMap: Record<DecisionType, string> = {
-    "Low Risk": "bg-green-600",
-    "Suspicious": "bg-yellow-600",
-    "High Risk": "bg-red-600",
-    "Inconclusive": "bg-gray-600",
-  };
-
-  const confidenceColorMap: Record<ConfidenceType, string> = {
-    High: "text-green-400",
-    Medium: "text-yellow-400",
-    Low: "text-red-400",
-  };
-
-  const riskColor = riskColorMap[data.decision];
-  const confidenceColor = confidenceColorMap[data.confidence];
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center min-h-screen p-10 text-white bg-slate-900">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-300">No result found</h2>
+          <button
+            onClick={() => navigate("/")}
+            className="px-6 py-3 mt-6 font-semibold bg-indigo-600 hover:bg-indigo-700 rounded-xl"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen p-8 text-white bg-gray-900">
-      <h1 className="mb-6 text-3xl font-bold">🔍 Analysis Results</h1>
+    <div className="min-h-screen px-4 py-8 text-white bg-slate-900 sm:px-6 lg:px-8">
+      <div className="mx-auto space-y-8 max-w-7xl">
+        {/* Header */}
+        <div className="pb-6 mb-8 border-b border-slate-700">
+          <h1 className="mb-3 text-4xl font-bold text-white sm:text-5xl">
+            Analysis Results
+          </h1>
+          <p className="text-lg text-slate-300">Comprehensive fraud detection analysis</p>
+        </div>
 
-      <div className="p-6 bg-gray-800 border border-gray-700 shadow-xl rounded-xl">
-        <div className="flex items-center justify-between">
-          <div className="text-lg font-semibold">
-            Fraud Score: <span className="text-blue-400">{data.fraudScore}%</span>
-          </div>
+        {/* Summary Card */}
+        <div className="p-8 mb-8 border shadow-2xl bg-slate-800 border-slate-700 rounded-2xl">
+          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+            <div className="text-center md:text-left">
+              <p className="mb-1 text-sm font-medium tracking-wider uppercase text-slate-300">
+                Fraud Score
+              </p>
+              <p className="mb-2 text-5xl font-bold text-indigo-400">
+                {data.fraudScore}%
+              </p>
+              <p className="text-sm text-slate-200">
+                Confidence:{" "}
+                <span className="font-semibold text-indigo-300">
+                  {data.confidence}
+                </span>
+              </p>
+            </div>
 
-          <div className={`px-3 py-1 rounded-md text-sm font-semibold ${riskColor}`}>
-            {data.decision}
+            <div className="px-8 py-4 text-lg font-bold text-white bg-indigo-600 shadow-lg rounded-xl">
+              {data.decision}
+            </div>
           </div>
         </div>
 
-        <div className="mt-3 text-sm">
-          Confidence Level:{" "}
-          <span className={`font-semibold ${confidenceColor}`}>
-            {data.confidence}
-          </span>
+        {/* Score Breakdown */}
+        <div className="mb-10">
+          <h2 className="mb-6 text-2xl font-semibold text-white">
+            Detailed Score Breakdown
+          </h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { label: "Image Analysis", value: data.breakdown.image, icon: "🖼️" },
+              { label: "Text Analysis", value: data.breakdown.text, icon: "📝" },
+              { label: "Metadata Analysis", value: data.breakdown.meta, icon: "🔍" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="p-8 text-center transition-all duration-300 border shadow-lg bg-slate-800 border-slate-700 rounded-xl hover:shadow-indigo-500/20 hover:border-indigo-500/50"
+              >
+                <div className="mb-3 text-4xl">{item.icon}</div>
+                <p className="mb-3 text-sm font-medium tracking-wider uppercase text-slate-300">
+                  {item.label}
+                </p>
+                <p className="text-4xl font-bold text-indigo-400">
+                  {item.value}%
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Forensic Heatmaps - Horizontal Layout */}
+        <div className="mb-10">
+          <h2 className="mb-6 text-2xl font-semibold text-white">
+            Forensic Analysis
+          </h2>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {data.breakdown.elaHeatmap && (
+              <div className="flex flex-col overflow-hidden transition-all duration-300 border shadow-lg bg-slate-800 border-slate-700 rounded-xl hover:shadow-indigo-500/20">
+                <h3 className="p-4 text-lg font-semibold text-center text-indigo-300 bg-slate-900">
+                  ELA Heatmap Analysis
+                </h3>
+                <div className="flex items-center justify-center flex-1 p-4 bg-black">
+                  <img
+                    src={`http://localhost:8000/${data.breakdown.elaHeatmap}`}
+                    className="object-contain w-full h-auto"
+                    style={{ minHeight: '300px', maxHeight: '400px' }}
+                    alt="ELA Heatmap - Error Level Analysis showing potential tampering"
+                  />
+                </div>
+                <p className="p-4 text-sm text-center text-slate-300 bg-slate-900">
+                  Error Level Analysis highlights areas with different compression levels
+                </p>
+              </div>
+            )}
+
+            {data.breakdown.edgeMap && (
+              <div className="flex flex-col overflow-hidden transition-all duration-300 border shadow-lg bg-slate-800 border-slate-700 rounded-xl hover:shadow-indigo-500/20">
+                <h3 className="p-4 text-lg font-semibold text-center text-indigo-300 bg-slate-900">
+                  Edge Detection Analysis
+                </h3>
+                <div className="flex items-center justify-center flex-1 p-4 bg-black">
+                  <img
+                    src={`http://localhost:8000/${data.breakdown.edgeMap}`}
+                    className="object-contain w-full h-auto"
+                    style={{ minHeight: '300px', maxHeight: '400px' }}
+                    alt="Edge Detection Map showing structural inconsistencies"
+                  />
+                </div>
+                <p className="p-4 text-sm text-center text-slate-300 bg-slate-900">
+                  Edge detection reveals structural inconsistencies and anomalies
+                </p>
+              </div>
+            )}
+
+            {data.breakdown.cloneMap && (
+              <div className="flex flex-col overflow-hidden transition-all duration-300 border shadow-lg bg-slate-800 border-slate-700 rounded-xl hover:shadow-indigo-500/20">
+                <h3 className="p-4 text-lg font-semibold text-center text-indigo-300 bg-slate-900">
+                  Clone Detection Analysis
+                </h3>
+                <div className="flex items-center justify-center flex-1 p-4 bg-black">
+                  <img
+                    src={`http://localhost:8000/${data.breakdown.cloneMap}`}
+                    className="object-contain w-full h-auto"
+                    style={{ minHeight: '300px', maxHeight: '400px' }}
+                    alt="Clone Detection Map identifying duplicated regions"
+                  />
+                </div>
+                <p className="p-4 text-sm text-center text-slate-300 bg-slate-900">
+                  Clone detection identifies duplicated or copied regions
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <button
+            onClick={() => navigate("/")}
+            className="flex-1 px-8 py-4 font-semibold text-white transition-all duration-300 shadow-lg bg-slate-700 hover:bg-slate-600 rounded-xl hover:shadow-xl"
+          >
+            ← Analyze Another Document
+          </button>
+
+          <button className="flex-1 px-8 py-4 font-semibold text-white transition-all duration-300 bg-indigo-600 shadow-lg hover:bg-indigo-700 rounded-xl hover:shadow-xl hover:shadow-indigo-500/50">
+            Download Report ↓
+          </button>
         </div>
       </div>
-
-      {/* Breakdown Section */}
-      <h2 className="mt-8 mb-4 text-2xl font-bold">📊 Scores Breakdown</h2>
-
-      <div className="grid grid-cols-3 gap-4 text-center">
-        <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
-          <div className="text-sm text-gray-400">Image Analysis</div>
-          <div className="text-lg font-bold text-blue-400">{data.breakdown.image}%</div>
-        </div>
-        <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
-          <div className="text-sm text-gray-400">Text Analysis</div>
-          <div className="text-lg font-bold text-blue-400">{data.breakdown.text}%</div>
-        </div>
-        <div className="p-4 bg-gray-800 border border-gray-700 rounded-lg">
-          <div className="text-sm text-gray-400">Metadata Analysis</div>
-          <div className="text-lg font-bold text-blue-400">{data.breakdown.meta}%</div>
-        </div>
-      </div>
-
-      {/* Heatmap Section */}
-      <h2 className="mt-10 mb-4 text-2xl font-bold">🖼 Forensic Heatmaps</h2>
-
-      <div className="grid grid-cols-3 gap-6">
-        {data.breakdown.elaHeatmap && (
-          <div>
-            <div className="mb-1 text-sm text-gray-400">ELA Heatmap</div>
-            <img
-              loading="lazy"
-              src={`http://localhost:8000/${data.breakdown.elaHeatmap}`}
-              className="transition-transform duration-200 border border-gray-700 rounded-lg shadow-lg hover:scale-105"
-            />
-          </div>
-        )}
-        {data.breakdown.edgeMap && (
-          <div>
-            <div className="mb-1 text-sm text-gray-400">Edge Detection</div>
-            <img
-              loading="lazy"
-              src={`http://localhost:8000/${data.breakdown.edgeMap}`}
-              className="transition-transform duration-200 border border-gray-700 rounded-lg shadow-lg hover:scale-105"
-            />
-          </div>
-        )}
-        {data.breakdown.cloneMap && (
-          <div>
-            <div className="mb-1 text-sm text-gray-400">Clone Detection</div>
-            <img
-              loading="lazy"
-              src={`http://localhost:8000/${data.breakdown.cloneMap}`}
-              className="transition-transform duration-200 border border-gray-700 rounded-lg shadow-lg hover:scale-105"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Report Download Button */}
-      <button onClick={async () => {const res = await fetch("http://localhost:8000/report", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(data)
-      });
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "forensic_report.pdf";
-      a.click();
-    }}
-    className="px-4 py-2 mt-10 font-medium transition bg-blue-600 rounded-lg hover:bg-blue-700">
-      📄 Download Forensic Report (PDF)
-      </button>
-      </div>
+    </div>
   );
 }

@@ -13,10 +13,8 @@ export default function Upload() {
     if (!file) return;
 
     setLoading(true);
-
     try {
       const result = await analyzeDocument(file);
-
       navigate("/result", {
         state: {
           fileName: file.name,
@@ -31,32 +29,58 @@ export default function Upload() {
     }
   };
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-900">
-      <div className="w-full max-w-lg p-8 shadow-xl bg-slate-800 rounded-xl">
-        <h1 className="mb-6 text-3xl font-bold text-center text-white">
-          Document Fraud Detection
-        </h1>
+ return (
+  <div className="flex items-center justify-center min-h-screen px-4 bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+    <div className="w-full max-w-2xl p-10 border shadow-2xl bg-slate-800/80 backdrop-blur-xl rounded-3xl border-slate-700">
+      
+      {/* Title */}
+      <h1 className="mb-3 text-4xl font-extrabold text-center text-white">
+        Document Fraud Detection
+      </h1>
 
-        <FileUpload onFileSelect={setFile} />
+      {/* Subtitle */}
+      <p className="mb-10 text-sm text-center text-slate-400">
+        Upload an identity document to analyze forgery, tampering, and authenticity
+      </p>
 
-        {file && (
-          <p className="mt-3 text-center text-green-400">
-            Selected: {file.name}
-          </p>
-        )}
+      {/* Upload box */}
+      <FileUpload onFileSelect={setFile} />
 
+      {/* Selected file */}
+      {file && (
+        <p className="mt-4 text-sm text-center text-emerald-400">
+          Selected file: <span className="font-medium">{file.name}</span>
+        </p>
+      )}
+
+      {/* Action */}
+      <div className="mt-10">
         {loading ? (
           <Loader />
         ) : (
-          <button
-            onClick={handleAnalyze}
-            className="w-full py-2 mt-6 text-white transition bg-indigo-600 rounded hover:bg-indigo-700"
-          >
-            Analyze Document
-          </button>
+         <button
+  onClick={handleAnalyze}
+  disabled={!file}
+  className={`w-full mt-8 py-8 rounded-4xl text-lg font-bold transition-all"
+    ${
+      file
+        ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg hover:shadow-indigo-500/40"
+        : "bg-slate-700 text-slate-300 border border-slate-500 cursor-not-allowed"
+    }`}
+>
+  {file ? "Analyze Document" : "Upload a document to analyze"}
+</button>
+
+
         )}
       </div>
+
+      {/* Footer */}
+      <p className="mt-6 text-xs text-center text-slate-500">
+        Supported formats: JPG, PNG, PDF
+      </p>
     </div>
-  );
+  </div>
+);
+
 }
