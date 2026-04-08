@@ -8,10 +8,12 @@ class FraudBreakdown(BaseModel):
     elaHeatmap: Optional[str] = None
     edgeMap: Optional[str] = None
     cloneMap: Optional[str] = None
-
+    gradcamMap: Optional[str] = None  # ← ADD
 
 class FraudResult(BaseModel):
     fraudScore: int
     decision: str
     confidence: str
+    flaggedPage: Optional[int] = None  # ← ADD
+    totalPages: int = 1                # ← ADD
     breakdown: FraudBreakdown

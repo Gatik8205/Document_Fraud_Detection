@@ -4,7 +4,6 @@ import type { FraudResult } from "../types/fraud";
 export default function Result() {
   const location = useLocation();
   const navigate = useNavigate();
-
   const data = location.state?.result as FraudResult;
 
   if (!data) {
@@ -23,9 +22,37 @@ export default function Result() {
     );
   }
 
+  // ── Fixed download report function ──────────────────────────────────────────
+  const handleDownloadReport = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Failed to generate report");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "fraud_report.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Report download failed. Please try again.");
+      console.error(err);
+    }
+  };
+  // ────────────────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen px-4 py-8 text-white bg-slate-900 sm:px-6 lg:px-8">
       <div className="mx-auto space-y-8 max-w-7xl">
+
         {/* Header */}
         <div className="pb-6 mb-8 border-b border-slate-700">
           <h1 className="mb-3 text-4xl font-bold text-white sm:text-5xl">
@@ -50,8 +77,14 @@ export default function Result() {
                   {data.confidence}
                 </span>
               </p>
-            </div>
 
+              {/* ── NEW: Flagged page info for PDFs ── */}
+              {(data.totalPages ?? 0) > 1 && data.flaggedPage && (
+                <p className="mt-2 text-sm text-yellow-400">
+                  ⚠️ Most suspicious content on page {data.flaggedPage} of {data.totalPages}
+                </p>
+              )}
+            </div>
             <div className="px-8 py-4 text-lg font-bold text-white bg-indigo-600 shadow-lg rounded-xl">
               {data.decision}
             </div>
@@ -85,27 +118,28 @@ export default function Result() {
           </div>
         </div>
 
-        {/* Forensic Heatmaps - Horizontal Layout */}
+        {/* Forensic Heatmaps */}
         <div className="mb-10">
           <h2 className="mb-6 text-2xl font-semibold text-white">
             Forensic Analysis
           </h2>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-4">
+
             {data.breakdown.elaHeatmap && (
               <div className="flex flex-col overflow-hidden transition-all duration-300 border shadow-lg bg-slate-800 border-slate-700 rounded-xl hover:shadow-indigo-500/20">
                 <h3 className="p-4 text-lg font-semibold text-center text-indigo-300 bg-slate-900">
-                  ELA Heatmap Analysis
+                  ELA Heatmap
                 </h3>
                 <div className="flex items-center justify-center flex-1 p-4 bg-black">
                   <img
                     src={`http://localhost:8000/${data.breakdown.elaHeatmap}`}
                     className="object-contain w-full h-auto"
-                    style={{ minHeight: '300px', maxHeight: '400px' }}
-                    alt="ELA Heatmap - Error Level Analysis showing potential tampering"
+                    style={{ minHeight: "250px", maxHeight: "350px" }}
+                    alt="ELA Heatmap"
                   />
                 </div>
-                <p className="p-4 text-sm text-center text-slate-300 bg-slate-900">
-                  Error Level Analysis highlights areas with different compression levels
+                <p className="p-3 text-xs text-center text-slate-400 bg-slate-900">
+                  Compression inconsistencies
                 </p>
               </div>
             )}
@@ -113,18 +147,18 @@ export default function Result() {
             {data.breakdown.edgeMap && (
               <div className="flex flex-col overflow-hidden transition-all duration-300 border shadow-lg bg-slate-800 border-slate-700 rounded-xl hover:shadow-indigo-500/20">
                 <h3 className="p-4 text-lg font-semibold text-center text-indigo-300 bg-slate-900">
-                  Edge Detection Analysis
+                  Edge Detection
                 </h3>
                 <div className="flex items-center justify-center flex-1 p-4 bg-black">
                   <img
                     src={`http://localhost:8000/${data.breakdown.edgeMap}`}
                     className="object-contain w-full h-auto"
-                    style={{ minHeight: '300px', maxHeight: '400px' }}
-                    alt="Edge Detection Map showing structural inconsistencies"
+                    style={{ minHeight: "250px", maxHeight: "350px" }}
+                    alt="Edge Map"
                   />
                 </div>
-                <p className="p-4 text-sm text-center text-slate-300 bg-slate-900">
-                  Edge detection reveals structural inconsistencies and anomalies
+                <p className="p-3 text-xs text-center text-slate-400 bg-slate-900">
+                  Structural inconsistencies
                 </p>
               </div>
             )}
@@ -132,21 +166,42 @@ export default function Result() {
             {data.breakdown.cloneMap && (
               <div className="flex flex-col overflow-hidden transition-all duration-300 border shadow-lg bg-slate-800 border-slate-700 rounded-xl hover:shadow-indigo-500/20">
                 <h3 className="p-4 text-lg font-semibold text-center text-indigo-300 bg-slate-900">
-                  Clone Detection Analysis
+                  Clone Detection
                 </h3>
                 <div className="flex items-center justify-center flex-1 p-4 bg-black">
                   <img
                     src={`http://localhost:8000/${data.breakdown.cloneMap}`}
                     className="object-contain w-full h-auto"
-                    style={{ minHeight: '300px', maxHeight: '400px' }}
-                    alt="Clone Detection Map identifying duplicated regions"
+                    style={{ minHeight: "250px", maxHeight: "350px" }}
+                    alt="Clone Map"
                   />
                 </div>
-                <p className="p-4 text-sm text-center text-slate-300 bg-slate-900">
-                  Clone detection identifies duplicated or copied regions
+                <p className="p-3 text-xs text-center text-slate-400 bg-slate-900">
+                  Duplicated regions
                 </p>
               </div>
             )}
+
+            {/* ── NEW: Grad-CAM card ── */}
+            {data.breakdown.gradcamMap && (
+              <div className="flex flex-col overflow-hidden transition-all duration-300 border shadow-lg bg-slate-800 border-slate-700 rounded-xl hover:shadow-indigo-500/20">
+                <h3 className="p-4 text-lg font-semibold text-center text-indigo-300 bg-slate-900">
+                  Grad-CAM
+                </h3>
+                <div className="flex items-center justify-center flex-1 p-4 bg-black">
+                  <img
+                    src={`http://localhost:8000/${data.breakdown.gradcamMap}`}
+                    className="object-contain w-full h-auto"
+                    style={{ minHeight: "250px", maxHeight: "350px" }}
+                    alt="Grad-CAM Heatmap"
+                  />
+                </div>
+                <p className="p-3 text-xs text-center text-slate-400 bg-slate-900">
+                  CNN attention regions
+                </p>
+              </div>
+            )}
+
           </div>
         </div>
 
@@ -158,11 +213,15 @@ export default function Result() {
           >
             ← Analyze Another Document
           </button>
-
-          <button className="flex-1 px-8 py-4 font-semibold text-white transition-all duration-300 bg-indigo-600 shadow-lg hover:bg-indigo-700 rounded-xl hover:shadow-xl hover:shadow-indigo-500/50">
+          {/* ── Fixed download button ── */}
+          <button
+            onClick={handleDownloadReport}
+            className="flex-1 px-8 py-4 font-semibold text-white transition-all duration-300 bg-indigo-600 shadow-lg hover:bg-indigo-700 rounded-xl hover:shadow-xl hover:shadow-indigo-500/50"
+          >
             Download Report ↓
           </button>
         </div>
+
       </div>
     </div>
   );
