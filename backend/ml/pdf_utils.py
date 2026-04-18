@@ -3,7 +3,7 @@ from PIL import Image
 import io
 
 def convert_pdf_to_image(pdf_path:str)-> Image.Image:
-    """Convert firt page of pdf to PIL image"""
+    """Convert first page of pdf to PIL image"""
     doc=fitz.open(pdf_path)
     image_paths=[]
 
