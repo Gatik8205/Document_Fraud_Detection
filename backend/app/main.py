@@ -32,8 +32,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-UPLOAD_DIR = Path("uploads")
-TEMP_DIR = Path("temp")
+BASE_DIR=Path(__file__).resolve().parent.parent
+UPLOAD_DIR= BASE_DIR / "uploads"
+TEMP_DIR = BASE_DIR / "temp"
 UPLOAD_DIR.mkdir(exist_ok=True)
 TEMP_DIR.mkdir(exist_ok=True)
 

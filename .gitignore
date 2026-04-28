@@ -2,7 +2,7 @@ backend/venv/
 __pycache__/
 *.pyc
 *.pt
-*.pth
+# *.pth
 temp/
 uploads/
 datasets/
