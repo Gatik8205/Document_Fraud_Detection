@@ -136,7 +136,7 @@ def analyze_image(file_path):
     file_path = str(file_path)
     base = os.path.splitext(os.path.basename(file_path))[0]
 
-    out_dir = "temp"
+    out_dir = str(Path(__file__).resolve().parent.parent.parent / "temp")
     os.makedirs(out_dir, exist_ok=True)
 
     ela_path = f"{out_dir}/{base}_ela.jpg"

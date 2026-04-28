@@ -6,6 +6,7 @@ from torchvision import transforms as T, models
 from PIL import Image
 import os
 from backend.ml.gradcam import GradCAM
+from pathlib import Path
 
 DEVICE=torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
@@ -72,7 +73,7 @@ def generate_gradcam(image_tensor,image_path,pred_class):
     heatmap=cv2.applyColorMap(np.uint8(255*cam),cv2.COLORMAP_JET)
     overlay=cv2.addWeighted(original,0.6,heatmap,0.4,0)
 
-    out_dir="temp"
+    out_dir=str(Path(__file__).resolve().parent.parent / "temp")
     os.makedirs(out_dir, exist_ok=True)
 
     out_path=f"{out_dir}/gradcam_{os.path.basename(image_path)}"
