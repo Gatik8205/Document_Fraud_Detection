@@ -41,7 +41,7 @@ TEMP_DIR = BASE_DIR / "temp"
 UPLOAD_DIR.mkdir(exist_ok=True)
 TEMP_DIR.mkdir(exist_ok=True)
 
-app.mount("/temp", StaticFiles(directory="temp"), name="temp")
+app.mount("/temp", StaticFiles(directory=str(TEMP_DIR)), name="temp")
 
 
 # ─── NEW: PDF → images helper ─────────────────────────────────────────────────
