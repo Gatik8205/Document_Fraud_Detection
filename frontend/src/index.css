@@ -1,8 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-body{
-    background: linear-gradient(135deg,#0f172a,#020617);
-    color: #e5e7eb;
-    font-family: 'Inter', sans-serif,system-ui;
+
+:root {
+  --bg-primary: #09090b;
+  --bg-secondary: #111113;
+  --bg-card: #141416;
+  --bg-elevated: #1a1a1e;
+  --amber: #d4880a;
+  --amber-bright: #f5a623;
+  --amber-dim: #8a5c10;
+  --text-primary: #e8e4d9;
+  --text-secondary: #8a8680;
+  --text-muted: #4a4744;
+  --risk-low: #2a9d5c;
+  --risk-mid: #d4880a;
+  --risk-high: #d93025;
+  --risk-low-bg: rgba(42, 157, 92, 0.08);
+  --risk-mid-bg: rgba(212, 136, 10, 0.08);
+  --risk-high-bg: rgba(217, 48, 37, 0.08);
+  --border: rgba(232, 228, 217, 0.07);
+  --border-amber: rgba(212, 136, 10, 0.3);
+  --scanline-opacity: 0.025;
 }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Grid texture background */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(212, 136, 10, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 136, 10, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Corner bracket decoration */
+.corner-brackets {
+  position: relative;
+}
+.corner-brackets::before,
+.corner-brackets::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-color: var(--amber-dim);
+  border-style: solid;
+}
+.corner-brackets::before {
+  top: -1px; left: -1px;
+  border-width: 2px 0 0 2px;
+}
+.corner-brackets::after {
+  bottom: -1px; right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Amber glow */
+.amber-glow {
+  box-shadow: 0 0 20px rgba(212, 136, 10, 0.15), 0 0 60px rgba(212, 136, 10, 0.05);
+}
+
+/* Pulse animation */
+@keyframes pulse-amber {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.pulse-amber { animation: pulse-amber 2s ease-in-out infinite; }
+
+/* Scan line animation */
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* Fade up */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.5s ease forwards; }
+.fade-up-1 { animation: fadeUp 0.5s 0.1s ease both; }
+.fade-up-2 { animation: fadeUp 0.5s 0.2s ease both; }
+.fade-up-3 { animation: fadeUp 0.5s 0.3s ease both; }
+.fade-up-4 { animation: fadeUp 0.5s 0.4s ease both; }
+.fade-up-5 { animation: fadeUp 0.5s 0.5s ease both; }
+
+/* Bar fill */
+@keyframes barFill {
+  from { width: 0%; }
+}
+.bar-fill { animation: barFill 1s 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) both; }
+
+/* Stamp animation */
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(1.4) rotate(-6deg); }
+  60% { opacity: 1; transform: scale(0.97) rotate(-6deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-6deg); }
+}
+.stamp { animation: stamp 0.4s 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+
+/* Number counter */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mono font utility */
+.font-mono { font-family: 'IBM Plex Mono', monospace; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--amber-dim); border-radius: 2px; }

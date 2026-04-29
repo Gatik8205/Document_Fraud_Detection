@@ -4,31 +4,31 @@ import FileUpload from "../components/FileUpload";
 import { analyzeDocument } from "../services/api";
 import Loader from "../components/Loader";
 
+const FEATURES = [
+  { icon: "◈", label: "Error Level Analysis" },
+  { icon: "◉", label: "CNN + Grad-CAM" },
+  { icon: "◇", label: "Metadata Forensics" },
+  { icon: "◎", label: "Clone Detection" },
+  { icon: "⬡", label: "OCR Text Scan" },
+  { icon: "◐", label: "Multi-Page PDF" },
+];
+
 export default function Upload() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [warmingUp, setWarmingUp] = useState(false);  // ← NEW
+  const [warmingUp, setWarmingUp] = useState(false);
   const navigate = useNavigate();
 
   const handleAnalyze = async () => {
     if (!file) return;
-
     setLoading(true);
-
-    // ← NEW: show warming up message if server takes > 5s
     const warmTimer = setTimeout(() => setWarmingUp(true), 5000);
-
     try {
       const result = await analyzeDocument(file);
-      navigate("/result", {
-        state: {
-          fileName: file.name,
-          result,
-        },
-      });
+      navigate("/result", { state: { fileName: file.name, result } });
     } catch (err) {
       console.error(err);
-      alert("Failed to analyze document");
+      alert("Analysis failed. Please try again.");
     } finally {
       clearTimeout(warmTimer);
       setLoading(false);
@@ -37,60 +37,110 @@ export default function Upload() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 bg-gradient-to-br from-slate-900 via-slate-800 to-black">
-      <div className="w-full max-w-2xl p-10 border shadow-2xl bg-slate-800/80 backdrop-blur-xl rounded-3xl border-slate-700">
+    <div
+      className="relative flex items-center justify-center min-h-screen px-4 py-12"
+      style={{ background: 'var(--bg-primary)', zIndex: 1 }}
+    >
+      <div className="relative z-10 w-full max-w-lg">
 
-        {/* Title */}
-        <h1 className="mb-3 text-4xl font-extrabold text-center text-white">
-          Document Fraud Detection
-        </h1>
-
-        {/* Subtitle */}
-        <p className="mb-10 text-sm text-center text-slate-400">
-          Upload an identity document to analyze forgery, tampering, and authenticity
-        </p>
-
-        {/* Upload box */}
-        <FileUpload onFileSelect={setFile} />
-
-        {/* Selected file */}
-        {file && (
-          <p className="mt-4 text-sm text-center text-emerald-400">
-            Selected file: <span className="font-medium">{file.name}</span>
-          </p>
-        )}
-
-        {/* Action */}
-        <div className="mt-10">
-          {loading ? (
-            <>
-              <Loader />
-              {/* ← NEW: warming up message for Render cold starts */}
-              {warmingUp && (
-                <p className="mt-4 text-sm text-center text-yellow-400">
-                  ⏳ Server is waking up, please wait ~30 seconds...
-                </p>
-              )}
-            </>
-          ) : (
-            <button
-              onClick={handleAnalyze}
-              disabled={!file}
-              className={`w-full mt-8 py-8 rounded-2xl text-lg font-bold transition-all ${
-                file
-                  ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg hover:shadow-indigo-500/40"
-                  : "bg-slate-700 text-slate-300 border border-slate-500 cursor-not-allowed"
-              }`}
+        {/* Header */}
+        <div className="mb-10 fade-up">
+          <div className="flex items-center gap-3 mb-6">
+            <div
+              className="flex items-center justify-center w-8 h-8 font-mono text-xs"
+              style={{ background: 'rgba(212, 136, 10, 0.12)', border: '1px solid rgba(212, 136, 10, 0.3)', color: 'var(--amber)' }}
             >
-              {file ? "Analyze Document" : "Upload a document to analyze"}
-            </button>
+              FD
+            </div>
+            <span className="font-mono text-xs tracking-widest" style={{ color: 'var(--text-muted)' }}>
+              FORENSIC DOCUMENT ANALYSIS SYSTEM v2.1
+            </span>
+          </div>
+
+          <h1
+            className="font-mono text-3xl font-semibold leading-tight tracking-tight"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            DOCUMENT<br />
+            <span style={{ color: 'var(--amber)' }}>FRAUD</span> DETECTION
+          </h1>
+
+          <p className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            Hybrid AI + classical forensics pipeline. Upload a document to detect tampering, forgery, and manipulation.
+          </p>
+        </div>
+
+        {/* Upload card */}
+        <div
+          className="relative p-6 mb-6 fade-up-1"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+        >
+          {/* Card header */}
+          <div className="flex items-center justify-between mb-5">
+            <span className="font-mono text-xs tracking-wider" style={{ color: 'var(--amber)' }}>
+              ▸ INPUT FILE
+            </span>
+            <span className="font-mono text-xs" style={{ color: 'var(--text-muted)' }}>
+              JPG · PNG · PDF
+            </span>
+          </div>
+
+          {loading ? (
+            <Loader warmingUp={warmingUp} />
+          ) : (
+            <>
+              <FileUpload onFileSelect={setFile} />
+
+              <button
+                onClick={handleAnalyze}
+                disabled={!file}
+                className="relative w-full py-4 mt-5 overflow-hidden font-mono text-sm tracking-widest transition-all duration-200 group"
+                style={{
+                  background: file ? 'rgba(212, 136, 10, 0.1)' : 'rgba(255,255,255,0.02)',
+                  border: '1px solid',
+                  borderColor: file ? 'rgba(212, 136, 10, 0.5)' : 'rgba(232, 228, 217, 0.06)',
+                  color: file ? 'var(--amber-bright)' : 'var(--text-muted)',
+                  cursor: file ? 'pointer' : 'not-allowed',
+                }}
+              >
+                {/* Hover fill effect */}
+                {file && (
+                  <span
+                    className="absolute inset-0 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                    style={{ background: 'rgba(212, 136, 10, 0.08)' }}
+                  />
+                )}
+                <span className="relative">
+                  {file ? '▶  RUN ANALYSIS' : 'SELECT A FILE TO BEGIN'}
+                </span>
+              </button>
+            </>
           )}
         </div>
 
+        {/* Feature list */}
+        <div className="grid grid-cols-3 gap-2 fade-up-2">
+          {FEATURES.map((f) => (
+            <div
+              key={f.label}
+              className="flex flex-col items-center gap-1.5 px-2 py-3 text-center"
+              style={{ background: 'rgba(20, 20, 22, 0.6)', border: '1px solid var(--border)' }}
+            >
+              <span className="text-base" style={{ color: 'var(--amber-dim)' }}>{f.icon}</span>
+              <span className="font-mono text-xs leading-tight" style={{ color: 'var(--text-muted)', fontSize: '10px' }}>
+                {f.label.toUpperCase()}
+              </span>
+            </div>
+          ))}
+        </div>
+
         {/* Footer */}
-        <p className="mt-6 text-xs text-center text-slate-500">
-          Supported formats: JPG, PNG, PDF
-        </p>
+        <div className="mt-8 text-center fade-up-3">
+          <span className="font-mono text-xs" style={{ color: 'var(--text-muted)' }}>
+            RESNET-18 · CASIA 2.0 · COMOFOD · CG-1050
+          </span>
+        </div>
+
       </div>
     </div>
   );
